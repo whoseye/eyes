@@ -1,7 +1,9 @@
 name: download clash
 
 on:
-  push:
+  schedule:
+    - cron: '10 */24 * * *'      # 每24小时运行一次，避免过度触发
+  workflow_dispatch:            # 也允许手动触发
 
 jobs:
   download-clash-config:
