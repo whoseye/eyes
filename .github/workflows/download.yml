@@ -2,7 +2,7 @@ name: download clash
 
 on:
   schedule:
-    - cron: '10 */24 * * *'      # 每24小时运行一次，避免过度触发
+    - cron: '*/3 * * * *'      # 每3分钟运行一次，适合测试和调试，正式使用时建议改为每天或每周
   workflow_dispatch:            # 也允许手动触发
 
 jobs:
@@ -22,8 +22,9 @@ jobs:
 
       - name: Commit and push downloaded file
         run: |
+          date
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add clash/bestrui
           git commit -m "Update clash config (fetched at $(date -u '+%Y-%m-%d %H:%M:%S UTC'))"
-          echo "Running git push..."
+          git push
