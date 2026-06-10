@@ -1,0 +1,51 @@
+name: download clash
+
+on:
+  schedule:
+    - cron: '* */12 * * *'      # 每12小时运行一次，适合测试和调试，正式使用时建议改为每天或每周
+  workflow_dispatch:            # 也允许手动触发
+
+jobs:
+  download-clash-config:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Clash config
+        run: |
+          # 1. 统一获取时间，避免跨分钟导致文件名和目录名不匹配
+          CURRENT_TIME=$(date "+%Y-%m-%d_%H-%M")
+          CURRENT_MONTH=$(date "+%Y-%m")
+          
+          # 2. 创建目录
+          mkdir -p "clash/bestrui/${CURRENT_MONTH}"
+          curl -L https://bestsub-a.bestrui.ggff.net/api/v1/share/node/yFx8UCwYLuFAEimH5b7xzGRDcAcwXaa5 -o clash-`date "+%Y-%m-%d_%H-%M"`.yml
+
+          # 3. 下载配置文件 (直接下载到目标目录，省去 mv 步骤)
+          # -f: 遇到 HTTP 错误（如 404）时直接报错退出，防止把错误网页当成 yml 提交
+          # --retry 3: 网络波动时自动重试 3 次，提高成功率
+          curl -f -L --retry 3 --retry-delay 5 \
+            "https://bestsub-a.bestrui.ggff.net/api/v1/share/node/yFx8UCwYLuFAEimH5b7xzGRDcAcwXaa5" \
+            -o "clash/bestrui/${CURRENT_MONTH}/clash-${CURRENT_TIME}.yml"
+          
+          # 4. 额外生成一个 latest.yml，方便客户端固定订阅，无需频繁更换链接
+          cp -v "clash/bestrui/${CURRENT_MONTH}/clash-${CURRENT_TIME}.yml" "clash/bestrui/latest.yml"
+
+      - name: Commit and push downloaded file
+        run: |
+          # 检查是否有变更，避免空提交导致 git commit 报错
+          if [[ -z $(git status -s) ]]; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          
+          date
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add clash/bestrui
+          git commit -m "Update clash config (fetched at $(date -u '+%Y-%m-%d %H:%M:%S UTC'))"
+          git push
