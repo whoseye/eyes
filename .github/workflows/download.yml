@@ -1,0 +1,29 @@
+name: download clash
+
+on:
+  schedule:
+    - cron: '0 1 * * *'      # 每24小时运行一次，避免过度触发
+  workflow_dispatch:            # 也允许手动触发
+
+jobs:
+  download-clash-config:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Clash config
+        run: |
+          curl -L https://bestsub-a.bestrui.ggff.net/api/v1/share/node/yFx8UCwYLuFAEimH5b7xzGRDcAcwXaa5 -o clash-`date "+%Y-%m-%d_%H-%M"`.yml
+          mkdir -p clash/bestrui/`date "+%Y-%m"`
+          mv clash-`date "+%Y-%m-%d_%H-%M"`.yml clash/bestrui/`date "+%Y-%m"`/
+
+      - name: Commit and push downloaded file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add clash/bestrui
+          git commit -m "Update clash config (fetched at $(date -u '+%Y-%m-%d %H:%M:%S UTC'))"
+          git push
