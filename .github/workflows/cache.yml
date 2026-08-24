@@ -22,7 +22,7 @@ jobs:
           
           # 2. 创建目录
           mkdir -p "clash/bestrui/${CURRENT_MONTH}"
-          curl -L https://bestsub-a.bestrui.ggff.net/api/v1/share/node/yFx8UCwYLuFAEimH5b7xzGRDcAcwXaa5 -o clash-`date "+%Y-%m-%d_%H-%M"`.yml
+          curl -L https://bestsub-a.bestrui.ggff.net/share/pginhjzgcqphlxuk -o clash-`date "+%Y-%m-%d_%H-%M"`.yml
 
           # 3. 下载配置文件 (直接下载到目标目录，省去 mv 步骤)
           # -f: 遇到 HTTP 错误（如 404）时直接报错退出，防止把错误网页当成 yml 提交
